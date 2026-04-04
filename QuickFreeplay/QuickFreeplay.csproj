@@ -1,0 +1,95 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- net472 required: supports netstandard2.0 which Assembly-CSharp targets -->
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>QuickFreeplay</AssemblyName>
+    <RootNamespace>QuickFreeplay</RootNamespace>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <!--
+      Set UCHPath to your Ultimate Chicken Horse installation folder.
+      Example (Steam default):
+        Windows: C:\Program Files (x86)\Steam\steamapps\common\Ultimate Chicken Horse
+    -->
+    <UCHPath Condition="'$(UCHPath)'==''">D:\Program Files\Steam\steamapps\common\Ultimate Chicken Horse</UCHPath>
+  </PropertyGroup>
+
+  <!-- ── Game references ────────────────────────────────────────────────── -->
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(UCHPath)\UltimateChickenHorse_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="UnityEngine">
+      <HintPath>$(UCHPath)\UltimateChickenHorse_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(UCHPath)\UltimateChickenHorse_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- UCH uses UNET (UnityEngine.Networking), not Mirror -->
+    <Reference Include="UnityEngine.UNETModule">
+      <HintPath>$(UCHPath)\UltimateChickenHorse_Data\Managed\UnityEngine.UNETModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- IMGUI types: GUIStyle, Rect, GUI, etc. -->
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(UCHPath)\UltimateChickenHorse_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- Required because Assembly-CSharp is compiled against netstandard 2.1 -->
+    <Reference Include="netstandard">
+      <HintPath>$(UCHPath)\UltimateChickenHorse_Data\Managed\netstandard.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- HLAPI: NetworkBehaviour, NetworkManager, NetworkServer, NetworkLobbyManager -->
+    <Reference Include="com.unity.multiplayer-hlapi.Runtime">
+      <HintPath>$(UCHPath)\UltimateChickenHorse_Data\Managed\com.unity.multiplayer-hlapi.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- Input.GetKeyDown -->
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(UCHPath)\UltimateChickenHorse_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- FontStyle, TextAnchor -->
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(UCHPath)\UltimateChickenHorse_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- ── BepInEx references ─────────────────────────────────────────────── -->
+  <ItemGroup>
+    <Reference Include="BepInEx">
+      <HintPath>$(UCHPath)\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="0Harmony">
+      <HintPath>$(UCHPath)\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- ── Post-build: copy DLL straight into the plugins folder ─────────── -->
+  <Target Name="DeployPlugin" AfterTargets="Build">
+    <Copy
+      SourceFiles="$(OutputPath)$(AssemblyName).dll"
+      DestinationFolder="$(UCHPath)\BepInEx\plugins"
+      SkipUnchangedFiles="true" />
+    <Message Text="[QFP] Deployed $(AssemblyName).dll → $(UCHPath)\BepInEx\plugins" Importance="high" />
+  </Target>
+
+</Project>

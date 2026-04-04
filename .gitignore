@@ -1,0 +1,22 @@
+# Build output
+bin/
+obj/
+
+# IDE / editor
+.vs/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Claude Code
+.claude/
+
+# Game DLLs (referenced from local install, not committed)
+*.dll
+!QuickFreeplay/bin/Release/**/*.dll
