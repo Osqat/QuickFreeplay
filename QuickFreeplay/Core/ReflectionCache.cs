@@ -36,6 +36,18 @@ namespace QuickFreeplay
         public static readonly FieldInfo LastRoundsToGo =
             AccessTools.Field(typeof(VersusControl), "lastRoundsToGo");
 
+        // GameControl.blocksArea  (protected float)
+        // Sum of placed blocks' individual areas — used to derive levelDensity.
+        public static readonly FieldInfo BlocksArea =
+            AccessTools.Field(typeof(GameControl), "blocksArea");
+
+        // GameControl.levelDensity  (protected float)
+        // blocksArea / LevelLayout.ComputedTotalArea; only updated by the game
+        // during the PLACE→PLAY transition (destroyMarkedPieces). We write it
+        // manually after restoring from freeplay so the first party box is correct.
+        public static readonly FieldInfo LevelDensity =
+            AccessTools.Field(typeof(GameControl), "levelDensity");
+
         // ScoreKeeper.historyPointBlocks  (private List<PointBlock>)
         // All tallied PointBlocks from previous rounds — needed for capture/save.
         public static readonly FieldInfo HistoryPointBlocks =
@@ -65,6 +77,8 @@ namespace QuickFreeplay
             if (PlaceablePlaced == null)      { Log("PlaceablePlaced"); ok = false; }
             if (LastRoundsMode == null)       { Log("LastRoundsMode"); ok = false; }
             if (LastRoundsToGo == null)       { Log("LastRoundsToGo"); ok = false; }
+            if (BlocksArea == null)           { Log("BlocksArea"); ok = false; }
+            if (LevelDensity == null)         { Log("LevelDensity"); ok = false; }
             if (HistoryPointBlocks == null)   { Log("HistoryPointBlocks"); ok = false; }
             if (CurrentPlayerQueue == null)   { Log("CurrentPlayerQueue"); ok = false; }
             if (GetCurrentXmlSnapshot == null){ Log("GetCurrentXmlSnapshot"); ok = false; }

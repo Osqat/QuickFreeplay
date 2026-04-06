@@ -124,6 +124,7 @@ namespace QuickFreeplay
             // Prepare all clients for scene reload: sync mode, show loading splash,
             // and reset sceneInitDone flags (without this, WaitForPlayers hangs forever).
             PrepareClientsForReload(GameState.GameMode.FREEPLAY);
+            LoadingInterstitialSplash.Instance?.FadeIn();
             Placeable.SetInitialSequenceID(0);
             NetworkManager.singleton.ServerChangeScene(SavedSnapshot.AssociatedScene);
         }
@@ -167,6 +168,7 @@ namespace QuickFreeplay
             // MaxRounds sync to non-host happens in DelayedScoreRestore during PLACE phase
             // (sending MsgApplyRuleset during freeplay corrupts non-host RuleBook UI).
             PrepareClientsForReload(GameState.GameMode.PARTY);
+            LoadingInterstitialSplash.Instance?.FadeIn();
             Placeable.SetInitialSequenceID(0);
             NetworkManager.singleton.ServerChangeScene(SavedSnapshot.AssociatedScene);
         }
@@ -333,6 +335,32 @@ namespace QuickFreeplay
                 QuickFreeplayPlugin.Log.LogWarning(
                     $"[QFP] DelayedScoreRestore: Aborted (vc={vc != null}, server={NetworkServer.active}).");
                 yield break;
+            }
+
+            // ── 0. Recalculate levelDensity so the first party box sees the correct
+            //       block density instead of the stale 0 from a brand-new session.
+            //       blocksArea is already correct (AddBlock is called during XML load),
+            //       but the game only derives levelDensity during the PLAY-phase transition,
+            //       which hasn't happened yet. We compute it ourselves now.
+            if (savedRoundNumber >= 2 && vc != null)
+            {
+                try
+                {
+                    float area      = (float)ReflectionCache.BlocksArea.GetValue(vc);
+                    float totalArea = vc.LevelLayout?.ComputedTotalArea ?? 0f;
+                    if (totalArea > 0f)
+                    {
+                        float density = area / totalArea;
+                        ReflectionCache.LevelDensity.SetValue(vc, density);
+                        QuickFreeplayPlugin.Log.LogInfo(
+                            $"[QFP] levelDensity recalculated: {density:F3} " +
+                            $"(blocksArea={area:F1}, totalArea={totalArea:F1})");
+                    }
+                }
+                catch (Exception e)
+                {
+                    QuickFreeplayPlugin.Log.LogWarning($"[QFP] Density recalc failed: {e.Message}");
+                }
             }
 
             try
@@ -537,6 +565,14 @@ namespace QuickFreeplay
             {
                 QuickFreeplayPlugin.Log.LogWarning($"[QFP] Backup exception: {e.Message}");
             }
+        }
+
+        public void ResetState()
+        {
+            StopAllCoroutines();
+            State            = ModState.IDLE;
+            SavedSnapshot    = null;
+            SuppressPartyBox = false;
         }
 
         public void ShowMessage(string msg, float duration = 4f)

@@ -11,6 +11,7 @@ Built for tournament and competitive use.
 - **Round tracking** - remaining rounds are synced correctly for host and all clients
 - **Multiplayer compatible** - only the host needs the mod installed
 - **Party box delay** - the scoreboard animation plays before the party box opens, keeping things clean for tournament streams
+- **Correct item percentages** - the game calculates block density (which affects what items appear in the party box) during the play phase, so on a fresh session it would be stale until the second round. When returning from freeplay on round 2 or later, density is recalculated immediately from the restored blocks so the very first party box after returning already has the correct item weights
 
 ## Requirements
 
@@ -77,6 +78,7 @@ QuickFreeplay/
 
 1. **Entering freeplay**: Captures a snapshot of the current match state (scores, round number, max rounds, placed blocks), switches to freeplay mode, and reloads the scene
 2. **Returning to match**: Restores party mode, reloads the scene, then during the PLACE phase:
+   - Recalculates `levelDensity` from the restored blocks (only on round 2+) so the first party box after returning uses correct item weights instead of a stale zero
    - Syncs the reduced max rounds to non-host clients via `MsgApplyRuleset`
    - Waits for UCHScoreboard to initialize
    - Replays all saved points as `MsgPointAwarded` messages through the game's network event pipeline
