@@ -87,4 +87,4 @@ QuickFreeplay/
 
 ## License
 
-MIT
+The Unlicense
